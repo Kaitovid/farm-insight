@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        serif: ['Libre Baskerville', 'Georgia', 'serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -47,6 +51,23 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        farm: {
+          green: "hsl(var(--farm-green))",
+          "green-light": "hsl(var(--farm-green-light))",
+          orange: "hsl(var(--farm-orange))",
+          "orange-light": "hsl(var(--farm-orange-light))",
+          earth: "hsl(var(--farm-earth))",
+          "earth-light": "hsl(var(--farm-earth-light))",
+          cream: "hsl(var(--farm-cream))",
+          sand: "hsl(var(--farm-sand))",
+        },
+        chart: {
+          green: "hsl(var(--chart-green))",
+          orange: "hsl(var(--chart-orange))",
+          earth: "hsl(var(--chart-earth))",
+          sage: "hsl(var(--chart-sage))",
+          gold: "hsl(var(--chart-gold))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -65,25 +86,26 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+      },
+      boxShadow: {
+        "farm": "0 4px 20px -2px hsl(var(--farm-green) / 0.15)",
+        "farm-lg": "0 10px 40px -5px hsl(var(--farm-green) / 0.2)",
       },
     },
   },
