@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Download, Search, TrendingUp, TrendingDown, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
 import {
   Select,
   SelectContent,
@@ -19,15 +20,19 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { mockMovimientos, categoriasGasto, categoriasVenta } from '@/data/mockData';
-import { MovimientoAvicola } from '@/types/farm';
+import { useAviculturaMovimientos, useCreateMovimiento, useDeleteMovimiento } from '@/hooks/useAvicultura';
+import { useCategorias } from '@/hooks/useCategorias';
 import { toast } from 'sonner';
 
 export default function Avicultura() {
-  const [movimientos, setMovimientos] = useState<MovimientoAvicola[]>(mockMovimientos);
+  const { data: movimientos = [], isLoading } = useAviculturaMovimientos();
+  const { data: categorias = [] } = useCategorias();
+  const createMovimiento = useCreateMovimiento();
+  const deleteMovimiento = useDeleteMovimiento();
   const [busqueda, setBusqueda] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialog, setDialog] = useState(false);
   const [nuevoMovimiento, setNuevoMovimiento] = useState({
     tipo: 'venta' as 'venta' | 'gasto',
     fecha: new Date().toISOString().split('T')[0],
@@ -36,12 +41,24 @@ export default function Avicultura() {
     monto: '',
   });
 
-  const movimientosFiltrados = movimientos.filter((m) => {
-    const coincideBusqueda = m.descripcion.toLowerCase().includes(busqueda.toLowerCase()) ||
-      m.categoria.toLowerCase().includes(busqueda.toLowerCase());
-    const coincideTipo = filtroTipo === 'todos' || m.tipo === filtroTipo;
-    return coincideBusqueda && coincideTipo;
-  });
+  const movimientosFiltrados = useMemo(() => {
+    return movimientos.filter((m) => {
+      const coincideBusqueda = m.descripcion.toLowerCase().includes(busqueda.toLowerCase()) ||
+        m.categoria.toLowerCase().includes(busqueda.toLowerCase());
+      const coincideTipo = filtroTipo === 'todos' || m.tipo === filtroTipo;
+      return coincideBusqueda && coincideTipo;
+    });
+  }, [movimientos, busqueda, filtroTipo]);
+
+  const categoriasVenta = useMemo(() =>
+    categorias.filter(c => c.sector === 'venta').map(c => c.nombre),
+    [categorias]
+  );
+
+  const categoriasGasto = useMemo(() =>
+    categorias.filter(c => c.sector === 'gasto').map(c => c.nombre),
+    [categorias]
+  );
 
   const totalVentas = movimientos.filter(m => m.tipo === 'venta').reduce((acc, m) => acc + m.monto, 0);
   const totalGastos = movimientos.filter(m => m.tipo === 'gasto').reduce((acc, m) => acc + m.monto, 0);
@@ -62,37 +79,55 @@ export default function Avicultura() {
     }).format(date);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!nuevoMovimiento.descripcion || !nuevoMovimiento.categoria || !nuevoMovimiento.monto) {
       toast.error('Por favor completa todos los campos');
       return;
     }
 
-    const nuevo: MovimientoAvicola = {
-      id: `m${Date.now()}`,
-      tipo: nuevoMovimiento.tipo,
-      fecha: new Date(nuevoMovimiento.fecha),
-      descripcion: nuevoMovimiento.descripcion,
-      categoria: nuevoMovimiento.categoria,
-      monto: parseFloat(nuevoMovimiento.monto),
-    };
+    try {
+      await createMovimiento.mutateAsync({
+        tipo: nuevoMovimiento.tipo,
+        fecha: nuevoMovimiento.fecha,
+        descripcion: nuevoMovimiento.descripcion,
+        categoria: nuevoMovimiento.categoria,
+        monto: parseFloat(nuevoMovimiento.monto),
+      });
 
-    setMovimientos([nuevo, ...movimientos]);
-    setDialogOpen(false);
-    setNuevoMovimiento({
-      tipo: 'venta',
-      fecha: new Date().toISOString().split('T')[0],
-      descripcion: '',
-      categoria: '',
-      monto: '',
-    });
-    toast.success('Movimiento registrado exitosamente');
+      setDialogOpen(false);
+      setNuevoMovimiento({
+        tipo: 'venta',
+        fecha: new Date().toISOString().split('T')[0],
+        descripcion: '',
+        categoria: 'Venta de pollos',
+        monto: '',
+      });
+      toast.success('Movimiento registrado exitosamente');
+    } catch (error) {
+      toast.error('Error al registrar el movimiento');
+      console.error(error);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setMovimientos(movimientos.filter(m => m.id !== id));
-    toast.success('Movimiento eliminado');
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMovimiento.mutateAsync(id);
+      toast.success('Movimiento eliminado');
+    } catch (error) {
+      toast.error('Error al eliminar el movimiento');
+      console.error(error);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-muted-foreground">Cargando movimientos...</p>
+      </div>
+    );
+  }
+
+  const [avesActivas, setAvesActivas] = useState(0);
 
   return (
     <div className="space-y-6">
@@ -103,10 +138,6 @@ export default function Avicultura() {
           <p className="text-muted-foreground">Gestión económica del sector avícola</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Exportar
-          </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="farm" className="gap-2">
@@ -151,17 +182,31 @@ export default function Avicultura() {
                   <Label>Categoría</Label>
                   <Select
                     value={nuevoMovimiento.categoria}
-                    onValueChange={(value) => setNuevoMovimiento({ ...nuevoMovimiento, categoria: value })}
+                    onValueChange={(value) =>
+                      setNuevoMovimiento({ ...nuevoMovimiento, categoria: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una categoría" />
                     </SelectTrigger>
+
                     <SelectContent>
-                      {(nuevoMovimiento.tipo === 'venta' ? categoriasVenta : categoriasGasto).map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
+                      {nuevoMovimiento.tipo === "venta" ? (
+                        <>
+                          <SelectItem value="venta_pollos">Venta de pollos</SelectItem>
+                          <SelectItem value="venta_huevos">Venta de huevos</SelectItem>
+                        </>
+                      ) : (
+                        <>
+                          <SelectItem value="empleados">Empleados</SelectItem>
+                          <SelectItem value="alimentacion">Alimentación</SelectItem>
+                          <SelectItem value="medicamentos">Medicamentos</SelectItem>
+                          <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
+
                 </div>
                 <div className="grid gap-2">
                   <Label>Descripción</Label>
@@ -190,6 +235,7 @@ export default function Avicultura() {
                 </Button>
               </DialogFooter>
             </DialogContent>
+            {/*ventana de dialo para sumar pollos con botones de suma y resta y un input de numeros*/}
           </Dialog>
         </div>
       </div>
@@ -271,29 +317,24 @@ export default function Avicultura() {
             <tbody>
               {movimientosFiltrados.map((m) => (
                 <tr key={m.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 text-sm text-foreground">{formatDate(m.fecha)}</td>
+                  <td className="px-4 py-3 text-sm text-foreground">{formatDate(new Date(m.fecha))}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${
-                      m.tipo === 'venta'
-                        ? 'bg-farm-green/10 text-farm-green'
-                        : 'bg-farm-orange/10 text-farm-orange'
-                    }`}>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${m.tipo === 'venta'
+                      ? 'bg-farm-green/10 text-farm-green'
+                      : 'bg-farm-orange/10 text-farm-orange'
+                      }`}>
                       {m.tipo === 'venta' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                       {m.tipo === 'venta' ? 'Venta' : 'Gasto'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-foreground">{m.categoria}</td>
                   <td className="px-4 py-3 text-sm text-foreground">{m.descripcion}</td>
-                  <td className={`px-4 py-3 text-sm text-right font-medium ${
-                    m.tipo === 'venta' ? 'text-farm-green' : 'text-farm-orange'
-                  }`}>
+                  <td className={`px-4 py-3 text-sm text-right font-medium ${m.tipo === 'venta' ? 'text-farm-green' : 'text-farm-orange'
+                    }`}>
                     {m.tipo === 'venta' ? '+' : '-'}{formatCurrency(m.monto)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"

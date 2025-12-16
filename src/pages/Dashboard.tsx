@@ -1,16 +1,135 @@
-import { useState } from 'react';
-import { DollarSign, TrendingUp, Bird, Beef, Wallet } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { DollarSign, TrendingUp, Bird, Beef, Wallet, Plus, Minus } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { ChartCard } from '@/components/dashboard/ChartCard';
 import { FilterBar } from '@/components/dashboard/FilterBar';
 import { SalesExpensesChart } from '@/components/dashboard/SalesExpensesChart';
 import { IncomeEvolutionChart } from '@/components/dashboard/IncomeEvolutionChart';
 import { ExpenseDistributionChart } from '@/components/dashboard/ExpenseDistributionChart';
-import { mockMetricas } from '@/data/mockData';
+import { useAviculturaMovimientos } from '@/hooks/useAvicultura';
+import { useGanado } from '@/hooks/useGanado';
 
 export default function Dashboard() {
+  const { data: movimientos = [], isLoading: isLoadingMovimientos } = useAviculturaMovimientos();
+  const { data: ganado = [], isLoading: isLoadingGanado } = useGanado();
   const [filtroFecha, setFiltroFecha] = useState('mes');
   const [filtroSector, setFiltroSector] = useState('todos');
+
+  const metricas = useMemo(() => {
+    const ventasTotales = movimientos.filter(m => m.tipo === 'venta').reduce((acc, m) => acc + m.monto, 0);
+    const gastosTotales = movimientos.filter(m => m.tipo === 'gasto').reduce((acc, m) => acc + m.monto, 0);
+    const utilidad = ventasTotales - gastosTotales;
+    const ganadoRegistrado = ganado.length;
+
+    return {
+      ventasTotales,
+      gastosTotales,
+      utilidad,
+      ganadoRegistrado,
+    };
+  }, [movimientos, ganado]);
+
+  // Procesar datos para gráficos
+  const chartData = useMemo(() => {
+    // Agrupar movimientos por mes
+    const movimientosPorMes = movimientos.reduce((acc, m) => {
+      const fecha = new Date(m.fecha);
+      const mes = fecha.toLocaleDateString('es-ES', { month: 'short' });
+      const mesKey = `${fecha.getFullYear()}-${fecha.getMonth()}`;
+
+      if (!acc[mesKey]) {
+        acc[mesKey] = {
+          mes: mes.charAt(0).toUpperCase() + mes.slice(1),
+          ventas: 0,
+          gastos: 0,
+          fecha: fecha,
+        };
+      }
+
+      if (m.tipo === 'venta') {
+        acc[mesKey].ventas += m.monto;
+      } else if (m.tipo === 'gasto') {
+        acc[mesKey].gastos += m.monto;
+      }
+
+      return acc;
+    }, {} as Record<string, { mes: string; ventas: number; gastos: number; fecha: Date }>);
+
+    // Convertir a array y ordenar por fecha
+    const ventasGastosPorMes = Object.values(movimientosPorMes)
+      .sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
+      .slice(-6) // Últimos 6 meses
+      .map(({ mes, ventas, gastos }) => ({ mes, ventas, gastos }));
+
+    // Calcular evolución de ingresos (utilidad = ventas - gastos)
+    const evolucionIngresos = ventasGastosPorMes.map(({ mes, ventas, gastos }) => ({
+      mes,
+      ingresos: ventas - gastos,
+    }));
+
+    // Calcular distribución de gastos por categoría
+    const gastosPorCategoria = movimientos
+      .filter(m => m.tipo === 'gasto')
+      .reduce((acc, m) => {
+        const categoria = m.categoria || 'Otros';
+        acc[categoria] = (acc[categoria] || 0) + m.monto;
+        return acc;
+      }, {} as Record<string, number>);
+
+    const totalGastos = Object.values(gastosPorCategoria).reduce((sum, val) => sum + val, 0);
+
+    const distribucionGastos = Object.entries(gastosPorCategoria)
+      .map(([categoria, valor]) => ({
+        categoria,
+        valor,
+        porcentaje: totalGastos > 0 ? (valor / totalGastos) * 100 : 0,
+      }))
+      .sort((a, b) => b.valor - a.valor);
+
+    return {
+      ventasGastosPorMes,
+      evolucionIngresos,
+      distribucionGastos,
+    };
+  }, [movimientos]);
+
+  // Procesar próximas vacunaciones
+  const proximasVacunaciones = useMemo(() => {
+    const hoy = new Date();
+    const treintaDias = new Date(hoy.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const vacunaciones = ganado.flatMap(animal =>
+      (animal.vacunaciones || [])
+        .filter(vac => vac.proxima_fecha)
+        .map(vac => {
+          const proximaFecha = new Date(vac.proxima_fecha!);
+          const diasRestantes = Math.ceil((proximaFecha.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+
+          let estado: 'vencida' | 'proxima' | 'programada';
+          if (diasRestantes < 0) {
+            estado = 'vencida';
+          } else if (diasRestantes <= 7) {
+            estado = 'proxima';
+          } else {
+            estado = 'programada';
+          }
+
+          return {
+            animal: `${animal.nombre} (${animal.numero_identificacion})`,
+            vacuna: vac.vacuna?.nombre || 'Vacuna',
+            fecha: proximaFecha.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
+            fechaOriginal: proximaFecha,
+            estado,
+            diasRestantes,
+          };
+        })
+    );
+
+    // Ordenar por fecha (más próximas primero)
+    return vacunaciones
+      .sort((a, b) => a.fechaOriginal.getTime() - b.fechaOriginal.getTime())
+      .slice(0, 5); // Mostrar solo las 5 más próximas
+  }, [ganado]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -20,6 +139,7 @@ export default function Dashboard() {
       maximumFractionDigits: 1,
     }).format(value);
   };
+
 
   return (
     <div className="space-y-8">
@@ -45,38 +165,29 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <MetricCard
           title="Ventas Totales"
-          value={formatCurrency(mockMetricas.ventasTotales)}
+          value={formatCurrency(metricas.ventasTotales)}
           icon={DollarSign}
           variant="primary"
-          trend={{ value: 8.2, isPositive: true }}
           delay={100}
         />
         <MetricCard
           title="Gastos Totales"
-          value={formatCurrency(mockMetricas.gastosTotales)}
+          value={formatCurrency(metricas.gastosTotales)}
           icon={Wallet}
           variant="accent"
-          trend={{ value: 3.1, isPositive: false }}
           delay={200}
         />
         <MetricCard
           title="Utilidad Neta"
-          value={formatCurrency(mockMetricas.utilidad)}
+          value={formatCurrency(metricas.utilidad)}
           icon={TrendingUp}
           variant="earth"
-          trend={{ value: 12.5, isPositive: true }}
           delay={300}
         />
-        <MetricCard
-          title="Aves Activas"
-          value={mockMetricas.avesActivas.toLocaleString()}
-          subtitle="En producción"
-          icon={Bird}
-          delay={400}
-        />
+
         <MetricCard
           title="Ganado Registrado"
-          value={mockMetricas.ganadoRegistrado.toString()}
+          value={metricas.ganadoRegistrado.toString()}
           subtitle="Cabezas de ganado"
           icon={Beef}
           delay={500}
@@ -90,7 +201,7 @@ export default function Dashboard() {
           subtitle="Comparativa mensual del sector avícola"
           delay={600}
         >
-          <SalesExpensesChart />
+          <SalesExpensesChart data={chartData.ventasGastosPorMes} />
         </ChartCard>
 
         <ChartCard
@@ -98,7 +209,7 @@ export default function Dashboard() {
           subtitle="Tendencia de ingresos netos"
           delay={700}
         >
-          <IncomeEvolutionChart />
+          <IncomeEvolutionChart data={chartData.evolucionIngresos} />
         </ChartCard>
       </div>
 
@@ -109,7 +220,7 @@ export default function Dashboard() {
           className="lg:col-span-1"
           delay={800}
         >
-          <ExpenseDistributionChart />
+          <ExpenseDistributionChart data={chartData.distribucionGastos} />
         </ChartCard>
 
         <div className="lg:col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '900ms', animationFillMode: 'forwards' }}>
@@ -117,33 +228,34 @@ export default function Dashboard() {
             Próximas Vacunaciones
           </h3>
           <div className="space-y-3">
-            {[
-              { animal: 'Tormenta (GAN-002)', vacuna: 'Fiebre Aftosa', fecha: '15 Ago 2024', estado: 'vencida' },
-              { animal: 'Estrella (GAN-001)', vacuna: 'Fiebre Aftosa', fecha: '20 Ene 2025', estado: 'proxima' },
-              { animal: 'Canela (GAN-005)', vacuna: 'Fiebre Aftosa', fecha: '01 Mar 2025', estado: 'programada' },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
-              >
-                <div>
-                  <p className="font-medium text-foreground">{item.animal}</p>
-                  <p className="text-sm text-muted-foreground">{item.vacuna}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">{item.fecha}</p>
-                  <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${
-                    item.estado === 'vencida' 
+            {proximasVacunaciones.length > 0 ? (
+              proximasVacunaciones.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">{item.animal}</p>
+                    <p className="text-sm text-muted-foreground">{item.vacuna}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-foreground">{item.fecha}</p>
+                    <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${item.estado === 'vencida'
                       ? 'bg-destructive/10 text-destructive'
                       : item.estado === 'proxima'
-                      ? 'bg-farm-orange/10 text-farm-orange'
-                      : 'bg-farm-green/10 text-farm-green'
-                  }`}>
-                    {item.estado === 'vencida' ? 'Vencida' : item.estado === 'proxima' ? 'Próxima' : 'Programada'}
-                  </span>
+                        ? 'bg-farm-orange/10 text-farm-orange'
+                        : 'bg-farm-green/10 text-farm-green'
+                      }`}>
+                      {item.estado === 'vencida' ? 'Vencida' : item.estado === 'proxima' ? 'Próxima' : 'Programada'}
+                    </span>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No hay vacunaciones programadas</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

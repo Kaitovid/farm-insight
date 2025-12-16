@@ -1,15 +1,16 @@
-import { 
-  LayoutDashboard, 
-  Bird, 
-  Beef, 
-  Syringe, 
-  Settings,
+import {
+  LayoutDashboard,
+  Bird,
+  Beef,
+  Syringe,
   ChevronLeft,
-  Menu
+  Menu,
+  LogOut
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AppSidebarProps {
   collapsed: boolean;
@@ -24,6 +25,7 @@ const menuItems = [
 ];
 
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
+  const { logout } = useAuth();
   return (
     <aside
       className={cn(
@@ -39,7 +41,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               <Beef className="h-5 w-5 text-sidebar-accent-foreground" />
             </div>
             <span className="font-serif text-lg font-bold text-sidebar-foreground">
-              AgroFinca
+              AgroSistem
             </span>
           </div>
         )}
@@ -73,17 +75,17 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 border-t border-sidebar-border p-3">
-        <NavLink
-          to="/configuracion"
+
+        <button
+          onClick={logout}
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive",
             collapsed && "justify-center px-2"
           )}
-          activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
         >
-          <Settings className="h-5 w-5 shrink-0" />
-          {!collapsed && <span>Configuración</span>}
-        </NavLink>
+          <LogOut className="h-5 w-5 shrink-0" />
+          {!collapsed && <span>Cerrar Sesión</span>}
+        </button>
       </div>
     </aside>
   );

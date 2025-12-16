@@ -1,5 +1,4 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { mockDistribucionGastos } from '@/data/mockData';
 
 const COLORS = [
   'hsl(var(--chart-green))',
@@ -9,7 +8,17 @@ const COLORS = [
   'hsl(var(--chart-gold))',
 ];
 
-export function ExpenseDistributionChart() {
+interface ExpenseDistributionData {
+  categoria: string;
+  valor: number;
+  porcentaje: number;
+}
+
+interface ExpenseDistributionChartProps {
+  data: ExpenseDistributionData[];
+}
+
+export function ExpenseDistributionChart({ data }: ExpenseDistributionChartProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -24,7 +33,7 @@ export function ExpenseDistributionChart() {
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={mockDistribucionGastos}
+            data={data}
             cx="50%"
             cy="50%"
             innerRadius={60}
@@ -33,7 +42,7 @@ export function ExpenseDistributionChart() {
             dataKey="valor"
             nameKey="categoria"
           >
-            {mockDistribucionGastos.map((_, index) => (
+            {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
@@ -46,8 +55,8 @@ export function ExpenseDistributionChart() {
             }}
             formatter={(value: number, name: string) => [formatCurrency(value), name]}
           />
-          <Legend 
-            verticalAlign="bottom" 
+          <Legend
+            verticalAlign="bottom"
             height={36}
             formatter={(value) => <span className="text-sm text-foreground">{value}</span>}
           />
