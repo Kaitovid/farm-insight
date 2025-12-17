@@ -75,17 +75,6 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 border-t border-sidebar-border p-3">
-
-        <button
-          onClick={logout}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive",
-            collapsed && "justify-center px-2"
-          )}
-        >
-          <LogOut className="h-5 w-5 shrink-0" />
-          {!collapsed && <span>Cerrar Sesión</span>}
-        </button>
       </div>
     </aside>
   );
