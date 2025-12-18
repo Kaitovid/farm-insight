@@ -49,32 +49,32 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border p-6 shadow-sm hover-lift animate-fade-up opacity-0",
+        "relative overflow-hidden rounded-xl border p-3 sm:p-4 md:p-6 shadow-sm hover-lift animate-fade-up opacity-0",
         variantStyles[variant],
         className
       )}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
       <div className="flex items-start justify-between">
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
           <p className={cn(
-            "text-sm font-medium",
+            "text-xs sm:text-sm font-medium truncate",
             variant === 'default' ? 'text-muted-foreground' : 'opacity-80'
           )}>
             {title}
           </p>
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
+          <p className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">{value}</p>
           {subtitle && (
-            <p className={cn("text-sm", subtitleStyles[variant])}>{subtitle}</p>
+            <p className={cn("text-xs sm:text-sm truncate", subtitleStyles[variant])}>{subtitle}</p>
           )}
           {trend && (
             <div className={cn(
-              "inline-flex items-center gap-1 text-sm font-medium",
+              "inline-flex items-center gap-1 text-xs sm:text-sm font-medium",
               trend.isPositive ? "text-farm-green" : "text-destructive"
             )}>
               <span>{trend.isPositive ? '↑' : '↓'}</span>
               <span>{Math.abs(trend.value)}%</span>
-              <span className={subtitleStyles[variant]}>vs mes anterior</span>
+              <span className={cn("hidden sm:inline", subtitleStyles[variant])}>vs mes anterior</span>
             </div>
           )}
         </div>

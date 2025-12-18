@@ -6,13 +6,7 @@ export function useAviculturaMovimientos() {
     return useQuery({
         queryKey: ['avicultura-movimientos'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('avicultura_movimientos')
-                .select('*')
-                .order('fecha', { ascending: false });
-
-            if (error) throw error;
-            return data as AviculturaMovimiento[];
+            return [] as AviculturaMovimiento[];
         },
     });
 }

@@ -6,13 +6,7 @@ export function useVacunas() {
     return useQuery({
         queryKey: ['vacunas'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('vacunas')
-                .select('*')
-                .order('nombre');
-
-            if (error) throw error;
-            return data as Vacuna[];
+            return [] as Vacuna[];
         },
     });
 }

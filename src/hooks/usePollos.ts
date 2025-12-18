@@ -6,15 +6,7 @@ export function usePollos() {
     return useQuery({
         queryKey: ['pollos'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('Pollos')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-
-            if (error && error.code !== 'PGRST116') throw error;
-            return data as Pollos | null;
+            return null as Pollos | null;
         },
     });
 }

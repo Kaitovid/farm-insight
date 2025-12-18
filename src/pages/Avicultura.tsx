@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Download, Search, TrendingUp, TrendingDown, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Search, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -32,7 +32,6 @@ export default function Avicultura() {
   const [busqueda, setBusqueda] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialog, setDialog] = useState(false);
   const [nuevoMovimiento, setNuevoMovimiento] = useState({
     tipo: 'venta' as 'venta' | 'gasto',
     fecha: new Date().toISOString().split('T')[0],
@@ -50,15 +49,6 @@ export default function Avicultura() {
     });
   }, [movimientos, busqueda, filtroTipo]);
 
-  const categoriasVenta = useMemo(() =>
-    categorias.filter(c => c.sector === 'venta').map(c => c.nombre),
-    [categorias]
-  );
-
-  const categoriasGasto = useMemo(() =>
-    categorias.filter(c => c.sector === 'gasto').map(c => c.nombre),
-    [categorias]
-  );
 
   const totalVentas = movimientos.filter(m => m.tipo === 'venta').reduce((acc, m) => acc + m.monto, 0);
   const totalGastos = movimientos.filter(m => m.tipo === 'gasto').reduce((acc, m) => acc + m.monto, 0);
@@ -127,34 +117,33 @@ export default function Avicultura() {
     );
   }
 
-  const [avesActivas, setAvesActivas] = useState(0);
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-foreground">Avicultura</h1>
-          <p className="text-muted-foreground">Gestión económica del sector avícola</p>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">Avicultura</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Gestión económica del sector avícola</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="farm" className="gap-2">
+              <Button variant="farm" className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
-                Nuevo Movimiento
+                <span className="hidden xs:inline">Nuevo Movimiento</span>
+                <span className="xs:hidden">Nuevo</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="font-serif">Registrar Movimiento</DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-sm">
                   Agrega una nueva venta o gasto al registro avícola.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label>Tipo de movimiento</Label>
+                  <Label className="text-sm">Tipo de movimiento</Label>
                   <Select
                     value={nuevoMovimiento.tipo}
                     onValueChange={(value: 'venta' | 'gasto') =>
@@ -171,7 +160,7 @@ export default function Avicultura() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Fecha</Label>
+                  <Label className="text-sm">Fecha</Label>
                   <Input
                     type="date"
                     value={nuevoMovimiento.fecha}
@@ -179,7 +168,7 @@ export default function Avicultura() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Categoría</Label>
+                  <Label className="text-sm">Categoría</Label>
                   <Select
                     value={nuevoMovimiento.categoria}
                     onValueChange={(value) =>
@@ -189,27 +178,28 @@ export default function Avicultura() {
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una categoría" />
                     </SelectTrigger>
-
                     <SelectContent>
-                      {nuevoMovimiento.tipo === "venta" ? (
-                        <>
-                          <SelectItem value="venta_pollos">Venta de pollos</SelectItem>
-                          <SelectItem value="venta_huevos">Venta de huevos</SelectItem>
-                        </>
-                      ) : (
-                        <>
-                          <SelectItem value="empleados">Empleados</SelectItem>
-                          <SelectItem value="alimentacion">Alimentación</SelectItem>
-                          <SelectItem value="medicamentos">Medicamentos</SelectItem>
-                          <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                        </>
-                      )}
+                      {nuevoMovimiento.tipo === "venta" 
+                        ? categorias
+                            .filter(c => c.sector === 'venta')
+                            .map(c => (
+                              <SelectItem key={c.id} value={c.nombre}>
+                                {c.nombre}
+                              </SelectItem>
+                            ))
+                        : categorias
+                            .filter(c => c.sector === 'gasto')
+                            .map(c => (
+                              <SelectItem key={c.id} value={c.nombre}>
+                                {c.nombre}
+                              </SelectItem>
+                            ))
+                      }
                     </SelectContent>
                   </Select>
-
                 </div>
                 <div className="grid gap-2">
-                  <Label>Descripción</Label>
+                  <Label className="text-sm">Descripción</Label>
                   <Input
                     placeholder="Descripción del movimiento"
                     value={nuevoMovimiento.descripcion}
@@ -217,7 +207,7 @@ export default function Avicultura() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Monto (COP)</Label>
+                  <Label className="text-sm">Monto (COP)</Label>
                   <Input
                     type="number"
                     placeholder="0"
@@ -226,60 +216,59 @@ export default function Avicultura() {
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
                   Cancelar
                 </Button>
-                <Button variant="farm" onClick={handleSubmit}>
+                <Button variant="farm" onClick={handleSubmit} className="w-full sm:w-auto">
                   Guardar
                 </Button>
               </DialogFooter>
             </DialogContent>
-            {/*ventana de dialo para sumar pollos con botones de suma y resta y un input de numeros*/}
           </Dialog>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+      {/* Summary Cards - Mobile optimized */}
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 md:gap-4">
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-farm-green/10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-farm-green/10 shrink-0">
               <TrendingUp className="h-5 w-5 text-farm-green" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Ventas</p>
-              <p className="text-xl font-bold text-foreground">{formatCurrency(totalVentas)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Ventas</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground truncate">{formatCurrency(totalVentas)}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-farm-orange/10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-farm-orange/10 shrink-0">
               <TrendingDown className="h-5 w-5 text-farm-orange" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Gastos</p>
-              <p className="text-xl font-bold text-foreground">{formatCurrency(totalGastos)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Gastos</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground truncate">{formatCurrency(totalGastos)}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-farm-earth/10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-farm-earth/10 shrink-0">
               <TrendingUp className="h-5 w-5 text-farm-earth" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Utilidad</p>
-              <p className="text-xl font-bold text-foreground">{formatCurrency(utilidad)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground">Utilidad</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground truncate">{formatCurrency(utilidad)}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-        <div className="relative flex-1 min-w-[200px]">
+      {/* Filters - Mobile optimized */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-xl border border-border bg-card p-3 sm:p-4 shadow-sm">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar movimientos..."
@@ -289,7 +278,7 @@ export default function Avicultura() {
           />
         </div>
         <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="Tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -300,26 +289,26 @@ export default function Avicultura() {
         </Select>
       </div>
 
-      {/* Table */}
+      {/* Table - Mobile optimized with horizontal scroll */}
       <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden animate-fade-up opacity-0" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Fecha</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Tipo</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Categoría</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Descripción</th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Monto</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">Acciones</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-muted-foreground">Fecha</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-muted-foreground">Tipo</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-muted-foreground">Categoría</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-muted-foreground hidden md:table-cell">Descripción</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-muted-foreground">Monto</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-muted-foreground">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {movimientosFiltrados.map((m) => (
                 <tr key={m.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 text-sm text-foreground">{formatDate(new Date(m.fecha))}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${m.tipo === 'venta'
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground whitespace-nowrap">{formatDate(new Date(m.fecha))}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${m.tipo === 'venta'
                       ? 'bg-farm-green/10 text-farm-green'
                       : 'bg-farm-orange/10 text-farm-orange'
                       }`}>
@@ -327,13 +316,13 @@ export default function Avicultura() {
                       {m.tipo === 'venta' ? 'Venta' : 'Gasto'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground">{m.categoria}</td>
-                  <td className="px-4 py-3 text-sm text-foreground">{m.descripcion}</td>
-                  <td className={`px-4 py-3 text-sm text-right font-medium ${m.tipo === 'venta' ? 'text-farm-green' : 'text-farm-orange'
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground">{m.categoria}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground hidden md:table-cell max-w-[200px] truncate">{m.descripcion}</td>
+                  <td className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-right font-medium whitespace-nowrap ${m.tipo === 'venta' ? 'text-farm-green' : 'text-farm-orange'
                     }`}>
                     {m.tipo === 'venta' ? '+' : '-'}{formatCurrency(m.monto)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex items-center justify-center gap-1">
                       <Button
                         variant="ghost"
@@ -350,6 +339,11 @@ export default function Avicultura() {
             </tbody>
           </table>
         </div>
+        {movimientosFiltrados.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <p className="text-sm">No se encontraron movimientos</p>
+          </div>
+        )}
       </div>
     </div>
   );

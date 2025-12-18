@@ -17,11 +17,11 @@ interface FilterBarProps {
 
 export function FilterBar({ filtroFecha, filtroSector, onFechaChange, onSectorChange }: FilterBarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
       <div className="flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-muted-foreground" />
+        <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
         <Select value={filtroFecha} onValueChange={onFechaChange}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px] h-9">
             <SelectValue placeholder="Período" />
           </SelectTrigger>
           <SelectContent>
@@ -33,9 +33,9 @@ export function FilterBar({ filtroFecha, filtroSector, onFechaChange, onSectorCh
       </div>
 
       <div className="flex items-center gap-2">
-        <Filter className="h-4 w-4 text-muted-foreground" />
+        <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
         <Select value={filtroSector} onValueChange={onSectorChange}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px] h-9">
             <SelectValue placeholder="Sector" />
           </SelectTrigger>
           <SelectContent>

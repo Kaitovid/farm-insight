@@ -168,30 +168,31 @@ export default function Ganaderia() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-foreground">Ganadería</h1>
-          <p className="text-muted-foreground">Gestión individual del ganado con ficha técnica</p>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">Ganadería</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Gestión individual del ganado con ficha técnica</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="farm" className="gap-2">
+            <Button variant="farm" className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
-              Agregar Ganado
+              <span className="hidden xs:inline">Agregar Ganado</span>
+              <span className="xs:hidden">Nuevo</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-serif">Registrar Nuevo Animal</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm">
                 Ingresa los datos del nuevo animal para agregarlo al registro.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label>Nombre del animal</Label>
+                <Label className="text-sm">Nombre del animal</Label>
                 <Input
                   placeholder="Ej: Estrella"
                   value={nuevoAnimal.nombre}
@@ -199,7 +200,7 @@ export default function Ganaderia() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Código identificador</Label>
+                <Label className="text-sm">Código identificador</Label>
                 <Input
                   placeholder="Ej: GAN-006"
                   value={nuevoAnimal.numero_identificacion}
@@ -207,7 +208,7 @@ export default function Ganaderia() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Fecha de entrada</Label>
+                <Label className="text-sm">Fecha de entrada</Label>
                 <Input
                   type="date"
                   value={nuevoAnimal.fecha_entrada}
@@ -216,7 +217,7 @@ export default function Ganaderia() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label>Edad de entrada (meses)</Label>
+                  <Label className="text-xs sm:text-sm">Edad de entrada (meses)</Label>
                   <Input
                     type="number"
                     placeholder="0"
@@ -225,7 +226,7 @@ export default function Ganaderia() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Peso inicial (kg)</Label>
+                  <Label className="text-xs sm:text-sm">Peso inicial (kg)</Label>
                   <Input
                     type="number"
                     placeholder="0"
@@ -235,11 +236,11 @@ export default function Ganaderia() {
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button variant="farm" onClick={handleSubmit}>
+              <Button variant="farm" onClick={handleSubmit} className="w-full sm:w-auto">
                 Guardar
               </Button>
             </DialogFooter>
@@ -248,16 +249,16 @@ export default function Ganaderia() {
 
         {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-serif">Editar Animal</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm">
                 Actualiza la información del animal.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label>Nombre del animal</Label>
+                <Label className="text-sm">Nombre del animal</Label>
                 <Input
                   placeholder="Ej: Vaca Manchada"
                   value={editAnimal.nombre}
@@ -265,7 +266,7 @@ export default function Ganaderia() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Código identificador</Label>
+                <Label className="text-sm">Código identificador</Label>
                 <Input
                   placeholder="Ej: GAN-006"
                   value={editAnimal.numero_identificacion}
@@ -273,7 +274,7 @@ export default function Ganaderia() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Fecha de entrada</Label>
+                <Label className="text-sm">Fecha de entrada</Label>
                 <Input
                   type="date"
                   value={editAnimal.fecha_entrada}
@@ -282,7 +283,7 @@ export default function Ganaderia() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label>Edad al entrar (meses)</Label>
+                  <Label className="text-xs sm:text-sm">Edad al entrar (meses)</Label>
                   <Input
                     type="number"
                     placeholder="0"
@@ -291,7 +292,7 @@ export default function Ganaderia() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Peso inicial (kg)</Label>
+                  <Label className="text-xs sm:text-sm">Peso inicial (kg)</Label>
                   <Input
                     type="number"
                     placeholder="0"
@@ -301,11 +302,11 @@ export default function Ganaderia() {
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button variant="farm" onClick={handleEdit}>
+              <Button variant="farm" onClick={handleEdit} className="w-full sm:w-auto">
                 Actualizar
               </Button>
             </DialogFooter>
@@ -313,40 +314,40 @@ export default function Ganaderia() {
         </Dialog>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+      {/* Stats - Mobile optimized */}
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 md:gap-4">
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary shrink-0">
               <Beef className="h-5 w-5 text-primary-foreground" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Animales</p>
-              <p className="text-2xl font-bold text-foreground">{animales.length}</p>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Animales</p>
+              <p className="text-xl sm:text-2xl font-bold text-foreground">{animales.length}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-accent">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-accent shrink-0">
               <Scale className="h-5 w-5 text-accent-foreground" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Peso Promedio</p>
-              <p className="text-2xl font-bold text-foreground">
-                {Math.round(animales.reduce((acc, a) => acc + a.peso_inicial, 0) / animales.length)} kg
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground">Peso Promedio</p>
+              <p className="text-xl sm:text-2xl font-bold text-foreground">
+                {Math.round(animales.reduce((acc, a) => acc + a.peso_inicial, 0) / animales.length) || 0} kg
               </p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
+        <div className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm animate-fade-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-earth">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-earth shrink-0">
               <Syringe className="h-5 w-5 text-primary-foreground" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Vacunas Pendientes</p>
-              <p className="text-2xl font-bold text-foreground">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground">Vacunas Pendientes</p>
+              <p className="text-xl sm:text-2xl font-bold text-foreground">
                 {animales.filter(a => a.vacunaciones.some(v =>
                   v.proxima_fecha && new Date(v.proxima_fecha) <= new Date()
                 )).length}
@@ -356,8 +357,8 @@ export default function Ganaderia() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+      {/* Search - Mobile optimized */}
+      <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 sm:p-4 shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -369,43 +370,43 @@ export default function Ganaderia() {
         </div>
       </div>
 
-      {/* Animal Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Animal Cards - Mobile optimized */}
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 md:gap-4">
         {animalesFiltrados.map((animal, index) => (
           <div
             key={animal.id}
-            className="rounded-xl border border-border bg-card p-5 shadow-sm hover-lift animate-fade-up opacity-0"
+            className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm hover-lift animate-fade-up opacity-0"
             style={{ animationDelay: `${400 + index * 100}ms`, animationFillMode: 'forwards' }}
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-farm-green/10">
-                  <Beef className="h-6 w-6 text-farm-green" />
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-farm-green/10 shrink-0">
+                  <Beef className="h-5 w-5 sm:h-6 sm:w-6 text-farm-green" />
                 </div>
-                <div>
-                  <h3 className="font-serif font-bold text-foreground">{animal.nombre}</h3>
-                  <p className="text-sm text-muted-foreground">{animal.numero_identificacion}</p>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-serif font-bold text-sm sm:text-base text-foreground truncate">{animal.nombre}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{animal.numero_identificacion}</p>
                 </div>
               </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openDetail(animal)}>
-                  <Eye className="h-4 w-4" />
+              <div className="flex gap-1 shrink-0">
+                <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8" onClick={() => openDetail(animal)}>
+                  <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(animal)}>
-                  <Edit2 className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8" onClick={() => openEdit(animal)}>
+                  <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
                   onClick={() => handleDelete(animal.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>
 
-            <div className="space-y-2 text-sm">
+            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Edad actual</span>
                 <span className="font-medium text-foreground">
@@ -424,7 +425,7 @@ export default function Ganaderia() {
               </div>
               <div className="pt-2 border-t border-border">
                 <div className="flex items-center gap-2">
-                  <Syringe className="h-4 w-4 text-farm-orange" />
+                  <Syringe className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-farm-orange shrink-0" />
                   <span className="text-xs text-muted-foreground truncate">
                     {getUltimaVacuna(animal)}
                   </span>
@@ -435,48 +436,54 @@ export default function Ganaderia() {
         ))}
       </div>
 
-      {/* Detail Dialog */}
+      {animalesFiltrados.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <p className="text-sm">No se encontraron animales</p>
+        </div>
+      )}
+
+      {/* Detail Dialog - Mobile optimized */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
           {selectedAnimal && (
             <>
               <DialogHeader>
                 <DialogTitle className="font-serif flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary shrink-0">
                     <Beef className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  {selectedAnimal.nombre}
+                  <span className="truncate">{selectedAnimal.nombre}</span>
                 </DialogTitle>
-                <DialogDescription>{selectedAnimal.numero_identificacion}</DialogDescription>
+                <DialogDescription className="text-sm">{selectedAnimal.numero_identificacion}</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg bg-muted p-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="rounded-lg bg-muted p-2.5 sm:p-3">
                     <p className="text-xs text-muted-foreground mb-1">Edad Actual</p>
-                    <p className="font-bold text-foreground">
+                    <p className="font-bold text-sm sm:text-base text-foreground">
                       {calcularEdadActual(selectedAnimal.fecha_entrada, selectedAnimal.edad_entrada_meses)} meses
                     </p>
                   </div>
-                  <div className="rounded-lg bg-muted p-3">
+                  <div className="rounded-lg bg-muted p-2.5 sm:p-3">
                     <p className="text-xs text-muted-foreground mb-1">Días en Finca</p>
-                    <p className="font-bold text-foreground">
+                    <p className="font-bold text-sm sm:text-base text-foreground">
                       {calcularDiasEnFinca(selectedAnimal.fecha_entrada)} días
                     </p>
                   </div>
-                  <div className="rounded-lg bg-muted p-3">
+                  <div className="rounded-lg bg-muted p-2.5 sm:p-3">
                     <p className="text-xs text-muted-foreground mb-1">Peso Inicial</p>
-                    <p className="font-bold text-foreground">{selectedAnimal.peso_inicial} kg</p>
+                    <p className="font-bold text-sm sm:text-base text-foreground">{selectedAnimal.peso_inicial} kg</p>
                   </div>
-                  <div className="rounded-lg bg-muted p-3">
+                  <div className="rounded-lg bg-muted p-2.5 sm:p-3">
                     <p className="text-xs text-muted-foreground mb-1">Fecha de Entrada</p>
-                    <p className="font-bold text-foreground">
+                    <p className="font-bold text-sm sm:text-base text-foreground">
                       {format(new Date(selectedAnimal.fecha_entrada), 'dd MMM yyyy', { locale: es })}
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
+                  <h4 className="font-medium text-sm sm:text-base text-foreground mb-3 flex items-center gap-2">
                     <Syringe className="h-4 w-4" />
                     Historial de Vacunaciones
                   </h4>
@@ -485,15 +492,15 @@ export default function Ganaderia() {
                   ) : (
                     <div className="space-y-2">
                       {selectedAnimal.vacunaciones.map((v) => (
-                        <div key={v.id} className="flex items-center justify-between rounded-lg border border-border p-3">
-                          <div>
-                            <p className="font-medium text-foreground">{v.vacuna.nombre}</p>
+                        <div key={v.id} className="flex items-center justify-between rounded-lg border border-border p-2.5 sm:p-3 gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-sm text-foreground truncate">{v.vacuna.nombre}</p>
                             <p className="text-xs text-muted-foreground">
                               {format(new Date(v.fecha_aplicacion), 'dd MMM yyyy', { locale: es })}
                             </p>
                           </div>
                           {v.proxima_fecha && (
-                            <span className={`text-xs px-2 py-1 rounded-full ${new Date(v.proxima_fecha) <= new Date()
+                            <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap shrink-0 ${new Date(v.proxima_fecha) <= new Date()
                               ? 'bg-destructive/10 text-destructive'
                               : 'bg-farm-green/10 text-farm-green'
                               }`}>
