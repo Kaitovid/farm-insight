@@ -1,8 +1,10 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "dash-granja",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
+  "description": "Sistema de gestión agrícola con dashboard para avicultura y ganadería",
+  "author": "Kaitovid",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
