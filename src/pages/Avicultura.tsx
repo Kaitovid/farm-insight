@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Plus, Search, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AviculturaMovimiento } from '@/types/database';
 
 import {
   Select,
@@ -38,6 +39,7 @@ export default function Avicultura() {
     descripcion: '',
     categoria: '',
     monto: '',
+    cantidadPollos: '',
   });
 
   const movimientosFiltrados = useMemo(() => {
@@ -48,6 +50,11 @@ export default function Avicultura() {
       return coincideBusqueda && coincideTipo;
     });
   }, [movimientos, busqueda, filtroTipo]);
+
+  // Debug: Ver qué categorías hay en la base de datos
+  useEffect(() => {
+    console.log('Categorías cargadas:', categorias);
+  }, [categorias]);
 
 
   const totalVentas = movimientos.filter(m => m.tipo === 'venta').reduce((acc, m) => acc + m.monto, 0);
@@ -76,26 +83,31 @@ export default function Avicultura() {
     }
 
     try {
-      await createMovimiento.mutateAsync({
+      const movimientoData: Omit<AviculturaMovimiento, 'id' | 'created_at' | 'usuario_id'> = {
         tipo: nuevoMovimiento.tipo,
         fecha: nuevoMovimiento.fecha,
         descripcion: nuevoMovimiento.descripcion,
         categoria: nuevoMovimiento.categoria,
         monto: parseFloat(nuevoMovimiento.monto),
-      });
+        numero_pollos: nuevoMovimiento.cantidadPollos ? parseInt(nuevoMovimiento.cantidadPollos) : null,
+      };
+
+      console.log('Enviando datos:', movimientoData);
+      await createMovimiento.mutateAsync(movimientoData);
 
       setDialogOpen(false);
       setNuevoMovimiento({
         tipo: 'venta',
         fecha: new Date().toISOString().split('T')[0],
         descripcion: '',
-        categoria: 'Venta de pollos',
+        categoria: '',
         monto: '',
+        cantidadPollos: '',
       });
       toast.success('Movimiento registrado exitosamente');
-    } catch (error) {
-      toast.error('Error al registrar el movimiento');
-      console.error(error);
+    } catch (error: any) {
+      console.error('Error completo:', error);
+      toast.error(error?.message || 'Error al registrar el movimiento');
     }
   };
 
@@ -122,8 +134,8 @@ export default function Avicultura() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">Avicultura</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Gestión económica del sector avícola</p>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">Agrocontaduria</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Gestión económica del sector agricola</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -154,8 +166,8 @@ export default function Avicultura() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="venta">Venta</SelectItem>
-                      <SelectItem value="gasto">Gasto</SelectItem>
+                      <SelectItem value="venta">Ventas</SelectItem>
+                      <SelectItem value="gasto">Gastos</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -181,14 +193,14 @@ export default function Avicultura() {
                     <SelectContent>
                       {nuevoMovimiento.tipo === "venta" 
                         ? categorias
-                            .filter(c => c.sector === 'venta')
+                            .filter(c => c.sector.includes('venta') || c.sector === 'Venta')
                             .map(c => (
                               <SelectItem key={c.id} value={c.nombre}>
                                 {c.nombre}
                               </SelectItem>
                             ))
                         : categorias
-                            .filter(c => c.sector === 'gasto')
+                            .filter(c => c.sector.includes('gasto') || c.sector === 'Gastos')
                             .map(c => (
                               <SelectItem key={c.id} value={c.nombre}>
                                 {c.nombre}
@@ -206,6 +218,38 @@ export default function Avicultura() {
                     onChange={(e) => setNuevoMovimiento({ ...nuevoMovimiento, descripcion: e.target.value })}
                   />
                 </div>
+                {nuevoMovimiento.categoria.includes('Animal') && (
+                    <div className="grid gap-2">
+                    <Label className="text-sm">Cantidad de Pollos</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={nuevoMovimiento.cantidadPollos}
+                      onChange={(e) => {
+                      const value = e.target.value;
+                      const negativeValue = value && parseFloat(value) > 0 ? `-${value}` : value;
+                      setNuevoMovimiento({ ...nuevoMovimiento, cantidadPollos: negativeValue });
+                      }}
+                    />
+                    </div>
+                    
+                )}
+                {nuevoMovimiento.categoria.includes('') && nuevoMovimiento.tipo === "gasto" && (
+                    <div className="grid gap-2">
+                    <Label className="text-sm">Cantidad de Pollos</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={nuevoMovimiento.cantidadPollos}
+                      onChange={(e) => {
+                      const value = e.target.value;
+                  
+                      setNuevoMovimiento({ ...nuevoMovimiento, cantidadPollos: value});
+                      }}
+                    />
+                    </div>
+                    
+                )}
                 <div className="grid gap-2">
                   <Label className="text-sm">Monto (COP)</Label>
                   <Input
@@ -299,6 +343,7 @@ export default function Avicultura() {
                 <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-muted-foreground">Tipo</th>
                 <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-muted-foreground">Categoría</th>
                 <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-muted-foreground hidden md:table-cell">Descripción</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-muted-foreground hidden lg:table-cell">N° Pollos</th>
                 <th className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-muted-foreground">Monto</th>
                 <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-muted-foreground">Acciones</th>
               </tr>
@@ -318,6 +363,9 @@ export default function Avicultura() {
                   </td>
                   <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground">{m.categoria}</td>
                   <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground hidden md:table-cell max-w-[200px] truncate">{m.descripcion}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-center text-foreground hidden lg:table-cell">
+                    {m.numero_pollos || '-'}
+                  </td>
                   <td className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-right font-medium whitespace-nowrap ${m.tipo === 'venta' ? 'text-farm-green' : 'text-farm-orange'
                     }`}>
                     {m.tipo === 'venta' ? '+' : '-'}{formatCurrency(m.monto)}

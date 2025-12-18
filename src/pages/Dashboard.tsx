@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { DollarSign, TrendingUp, Beef, Wallet } from 'lucide-react';
+import { DollarSign, TrendingUp, Beef, Wallet, Bird } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { ChartCard } from '@/components/dashboard/ChartCard';
 import { FilterBar } from '@/components/dashboard/FilterBar';
@@ -21,11 +21,25 @@ export default function Dashboard() {
     const utilidad = ventasTotales - gastosTotales;
     const ganadoRegistrado = ganado.length;
 
+    
+   
+        //sumar toda la tabla de movimientos donde el tipo es gasto y sumar la columna numero_pollos   
+    const totalPollos = movimientos.reduce(
+  (acc, m) => acc + (m.numero_pollos || 0),
+  0
+);
+
+
+    const pollosActivos = totalPollos;
+    
+
+    
     return {
       ventasTotales,
       gastosTotales,
       utilidad,
       ganadoRegistrado,
+      pollosActivos,
     };
   }, [movimientos, ganado]);
 
@@ -184,6 +198,13 @@ export default function Dashboard() {
           icon={TrendingUp}
           variant="earth"
           delay={300}
+        />
+        <MetricCard
+          title='Pollos Activos'
+          value={metricas.pollosActivos.toString()}
+          subtitle='Pico de pollos'
+          icon={Bird}
+          delay={400}
         />
         <MetricCard
           title="Ganado Registrado"

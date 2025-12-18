@@ -6,7 +6,36 @@ export function usePollos() {
     return useQuery({
         queryKey: ['pollos'],
         queryFn: async () => {
-            return null as Pollos | null;
+            const { data, error } = await supabase
+                .from('Pollos')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching pollos:', error);
+                throw error;
+            }
+            return data as Pollos[];
+        },
+    });
+}
+
+export function useCreatePollos() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (pollos: Omit<Pollos, 'id' | 'created_at'>) => {
+            const { data, error } = await supabase
+                .from('Pollos')
+                .insert([pollos])
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pollos'] });
         },
     });
 }
@@ -15,36 +44,16 @@ export function useUpdatePollos() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (numero_pollos: number) => {
-            // Primero intentamos obtener el registro existente
-            const { data: existing } = await supabase
+        mutationFn: async ({ id, Numero_pollos }: { id: string; Numero_pollos: number }) => {
+            const { data, error } = await supabase
                 .from('Pollos')
-                .select('*')
-                .limit(1)
+                .update({ Numero_pollos })
+                .eq('id', id)
+                .select()
                 .single();
 
-            if (existing) {
-                // Si existe, actualizamos
-                const { data, error } = await supabase
-                    .from('Pollos')
-                    .update({ numero_pollos })
-                    .eq('id', existing.id)
-                    .select()
-                    .single();
-
-                if (error) throw error;
-                return data;
-            } else {
-                // Si no existe, creamos uno nuevo
-                const { data, error } = await supabase
-                    .from('Pollos')
-                    .insert([{ numero_pollos }])
-                    .select()
-                    .single();
-
-                if (error) throw error;
-                return data;
-            }
+            if (error) throw error;
+            return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['pollos'] });

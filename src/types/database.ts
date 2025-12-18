@@ -4,6 +4,7 @@ export interface Categoria {
     id: string;
     nombre: string;
     sector: string;
+    descripcion: string;
     created_at: string;
 }
 
@@ -20,6 +21,7 @@ export interface AviculturaMovimiento {
     descripcion: string;
     categoria: string;
     monto: number;
+    numero_pollos?: number | null;
     usuario_id: string;
     created_at: string;
 }
@@ -67,8 +69,3 @@ export interface GanadoWithVacunas extends Ganado {
     pesos: GanadoPeso[];
 }
 
-export interface Pollos {
-    id: string;
-    numero_pollos: number;
-    created_at: string;
-}

@@ -20,7 +20,7 @@ interface AppSidebarProps {
 
 const menuItems = [
   { title: 'Panel de Control', url: '/', icon: LayoutDashboard },
-  { title: 'Avicultura', url: '/avicultura', icon: Bird },
+  { title: 'Agrocontaduria', url: '/avicultura', icon: Bird },
   { title: 'Ganadería', url: '/ganaderia', icon: Beef },
   { title: 'Control Sanitario', url: '/sanitario', icon: Syringe },
 ];

@@ -6,7 +6,31 @@ export function useGanado() {
     return useQuery({
         queryKey: ['ganado'],
         queryFn: async () => {
-            return [] as GanadoWithVacunas[];
+            const { data, error } = await supabase
+                .from('ganado')
+                .select(`
+                    *,
+                    vacunaciones:ganado_vacunas(
+                        id,
+                        vacuna_id,
+                        fecha_aplicacion,
+                        proxima_fecha,
+                        observaciones,
+                        vacuna:vacunas(
+                            id,
+                            nombre,
+                            descripcion,
+                            frecuencia_dias
+                        )
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching ganado:', error);
+                throw error;
+            }
+            return data as GanadoWithVacunas[];
         },
     });
 }

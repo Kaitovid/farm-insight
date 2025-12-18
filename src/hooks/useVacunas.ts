@@ -6,7 +6,16 @@ export function useVacunas() {
     return useQuery({
         queryKey: ['vacunas'],
         queryFn: async () => {
-            return [] as Vacuna[];
+            const { data, error } = await supabase
+                .from('vacunas')
+                .select('*')
+                .order('nombre');
+
+            if (error) {
+                console.error('Error fetching vacunas:', error);
+                throw error;
+            }
+            return data as Vacuna[];
         },
     });
 }
@@ -72,6 +81,8 @@ export function useCreateVacuna() {
 
 
 export function useDeleteVacunacion() {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (id: string) => {
             const { error } = await supabase
@@ -80,6 +91,10 @@ export function useDeleteVacunacion() {
                 .eq('id', id);
 
             if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['ganado'] });
+            queryClient.invalidateQueries({ queryKey: ['ganado-vacunas'] });
         },
     });
 }

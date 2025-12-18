@@ -6,7 +6,16 @@ export function useAviculturaMovimientos() {
     return useQuery({
         queryKey: ['avicultura-movimientos'],
         queryFn: async () => {
-            return [] as AviculturaMovimiento[];
+            const { data, error } = await supabase
+                .from('avicultura_movimientos')
+                .select('*')
+                .order('fecha', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching movimientos:', error);
+                throw error;
+            }
+            return data as AviculturaMovimiento[];
         },
     });
 }
@@ -16,13 +25,23 @@ export function useCreateMovimiento() {
 
     return useMutation({
         mutationFn: async (movimiento: Omit<AviculturaMovimiento, 'id' | 'created_at' | 'usuario_id'>) => {
+            // Obtener el usuario actual o usar un ID por defecto
+            const {} = await supabase.auth.getUser();
+            
+           
+
             const { data, error } = await supabase
                 .from('avicultura_movimientos')
-                .insert([movimiento])
+                .insert([{
+                    ...movimiento,
+                }])
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error al insertar movimiento:', error);
+                throw error;
+            }
             return data;
         },
         onSuccess: () => {

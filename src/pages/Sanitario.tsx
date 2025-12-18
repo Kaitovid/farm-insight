@@ -125,7 +125,7 @@ export default function Sanitario() {
     try {
       await createVacuna.mutateAsync({
         nombre: nuevaVacunaCatalogo.nombre,
-        descripcion: nuevaVacunaCatalogo.descripcion || null,
+        descripcion: nuevaVacunaCatalogo.descripcion || String(null),
         frecuencia_dias: parseInt(nuevaVacunaCatalogo.frecuencia_dias),
       });
 
