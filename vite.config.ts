@@ -17,11 +17,9 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: "ES2020",
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        drop_console: true,
-      },
+    minify: "esbuild",
+    esbuild: {
+      drop: mode === "production" ? ["console", "debugger"] : [],
     },
     sourcemap: false,
     rollupOptions: {
