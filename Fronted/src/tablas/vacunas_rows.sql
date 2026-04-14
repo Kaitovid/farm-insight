@@ -1,0 +1,1 @@
+INSERT INTO "public"."vacunas" ("id", "nombre", "descripcion", "frecuencia_dias", "created_at") VALUES ('e49b3163-9b13-4d81-b468-276762435aeb', 'fiebre aptosa', 'ICA', 6, '2025-12-18 04:00:07.922292+00');

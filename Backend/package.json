@@ -1,0 +1,16 @@
+{
+  "name": "dash-granja-backend",
+  "version": "1.0.0",
+  "description": "Backend API for DashGranja",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "node --watch api/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "@neondatabase/serverless": "^1.0.2",
+    "dotenv": "^17.4.1"
+  }
+}

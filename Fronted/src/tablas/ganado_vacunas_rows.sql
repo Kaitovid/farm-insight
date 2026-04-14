@@ -1,0 +1,1 @@
+INSERT INTO "public"."ganado_vacunas" ("id", "ganado_id", "vacuna_id", "fecha_aplicacion", "proxima_fecha", "observaciones", "created_at") VALUES ('5d148bec-badb-46fc-995a-c6ed79c8a48d', '17d7814e-df98-4897-9786-5a94adaa9c39', 'e49b3163-9b13-4d81-b468-276762435aeb', '2025-12-06', '2026-06-06', 'ICA', '2025-12-18 04:13:48.025359+00');

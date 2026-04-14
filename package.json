@@ -1,0 +1,15 @@
+{
+  "name": "dash-granja-root",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix Fronted && npm install --prefix Backend",
+    "dev:front": "npm run dev --prefix Fronted",
+    "dev:back": "npm run dev --prefix Backend",
+    "dev": "concurrently \"npm run dev:front\" \"npm run dev:back\"",
+    "build": "npm run build --prefix Fronted",
+    "start:back": "npm start --prefix Backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
