@@ -22,6 +22,7 @@ export interface AviculturaMovimiento {
     categoria: string;
     monto: number;
     numero_pollos?: number | null;
+    sector?: string;
     usuario_id: string;
     created_at: string;
 }

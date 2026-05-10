@@ -175,7 +175,13 @@ app.delete('/api/ganado-vacunas/:id', async (req, res) => {
 
 app.get('/api/avicultura-movimientos', async (req, res) => {
   try {
-    const rows = await sql`SELECT * FROM avicultura_movimientos ORDER BY fecha DESC`;
+    const { sector } = req.query;
+    let rows;
+    if (sector) {
+      rows = await sql`SELECT * FROM avicultura_movimientos WHERE sector = ${sector} ORDER BY fecha DESC`;
+    } else {
+      rows = await sql`SELECT * FROM avicultura_movimientos ORDER BY fecha DESC`;
+    }
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -185,10 +191,10 @@ app.get('/api/avicultura-movimientos', async (req, res) => {
 
 app.post('/api/avicultura-movimientos', async (req, res) => {
   try {
-    const { tipo, fecha, descripcion, categoria, monto, numero_pollos } = req.body;
+    const { tipo, fecha, descripcion, categoria, monto, numero_pollos, sector } = req.body;
     const [row] = await sql`
-      INSERT INTO avicultura_movimientos (tipo, fecha, descripcion, categoria, monto, numero_pollos)
-      VALUES (${tipo}, ${fecha}, ${descripcion}, ${categoria}, ${monto}, ${numero_pollos ?? null})
+      INSERT INTO avicultura_movimientos (tipo, fecha, descripcion, categoria, monto, numero_pollos, sector)
+      VALUES (${tipo}, ${fecha}, ${descripcion}, ${categoria}, ${monto}, ${numero_pollos ?? null}, ${sector ?? 'avicola'})
       RETURNING *
     `;
     res.json(row);

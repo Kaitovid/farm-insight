@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Avicultura from "./pages/Avicultura";
+import AviculturaSectorAvicola from "./pages/AviculturaSectorAvicola";
+import AviculturaSectorGandero from "./pages/AviculturaSectorGandero";
+import AviculturaSectorFructifero from "./pages/AviculturaSectorFructifero";
 import Ganaderia from "./pages/Ganaderia";
 import Sanitario from "./pages/Sanitario";
 // import Login from "./pages/Login";
@@ -26,6 +29,9 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/avicultura" element={<Avicultura />} />
+                <Route path="/avicultura/avicola" element={<AviculturaSectorAvicola />} />
+                <Route path="/avicultura/gandero" element={<AviculturaSectorGandero />} />
+                <Route path="/avicultura/fructifero" element={<AviculturaSectorFructifero />} />
                 <Route path="/ganaderia" element={<Ganaderia />} />
                 <Route path="/sanitario" element={<Sanitario />} />
                 <Route path="*" element={<NotFound />} />
